@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="DAGAPP">
+<head>
+    <link rel="stylesheet" type="text/css" href="app/style/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="app/style/main.css">
+    <script src="app/vendor/angular/angular.min.js"></script>
+    <script src="app/vendor/angular/angular-route.min.js"></script>
+    <script src="app/vendor/angular/angular-animate.min.js"></script>
+	<script src="app/vendor/angular-ui/ui-bootstrap-tpls-0.10.0.min.js"></script>
+	<script src="app/vendor/underscore-min.js"></script>
+    <script src="app/vendor/d3.min.js"></script>
+    <script src="app/scripts/app.js"></script>
+    <script src="app/scripts/controllers/main.js"></script>
+    <script src="app/scripts/directives.js"></script>
+    <title>My App</title>
+</head>
+<body ng-controller="main">
+<div id="dag">
+    <dag></dag>
+</div>
+<div id="controls">
+    <input type="text" ng-model="parameter" />
+    <button class="btn btn-success" ng-click="addParam(parameter)" ng-disabled="parameter.length===0">Add</button>
+    <ul>
+        <li ng-repeat="item in params">
+            <label>{{item.name}}</label>
+            <i ng-show="item.drawn" class="glyphicon glyphicon-minus"></i>
+            <i ng-show="!item.drawn" class="glyphicon glyphicon-plus" ng-click="draw(item);"></i>
+        </li>
+    </ul>
+</div>
+</body>
+</html>

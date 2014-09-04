@@ -1,0 +1,4 @@
+## Ignore JetBrain Webstorm config and xml files
+
+.idea/
+old/
