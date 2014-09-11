@@ -6,7 +6,7 @@ myApp.directive("dag", function() {
             var height = document.getElementById('dag').offsetHeight;
             var rectWidth = 50;
             var rectHeight = 25;
-            var links = [], link;
+            var links = [], linkObj={}, link;
 
             var line = d3.svg.line()
                     .x(function(d) {return d.x; })
@@ -34,6 +34,20 @@ myApp.directive("dag", function() {
             var drag = force.drag()
                 .on("dragstart", dragstart);
 
+            //create arrow
+            svg.append("svg:defs").selectAll("marker")
+                .data(["end"])      // Different link/path types can be defined here
+                .enter().append("svg:marker")    // This section adds in the arrows
+                .attr("id", String)
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", 8)
+                .attr("refY", -0.5)
+                .attr("markerWidth", 6)
+                .attr("markerHeight", 6)
+                .attr("orient", "auto")
+                .append("svg:path")
+                .attr("d", "M0,-5L10,0L0,5");
+
             scope.$watchCollection('toDraw', function() {
                 updateDag();
             });
@@ -44,13 +58,19 @@ myApp.directive("dag", function() {
 
                 var nodeEnter = node.enter().append("g")
                     .attr("class", "node")
-                    .on("dblclick", function(d,i) {
-                        if (d3.event.defaultPrevented && scope.toDraw.length >1) return;
-                        var n  = i===0 ? 1 : 0;
-                        var link = {source:d, target:scope.toDraw[n]};
-                        d.links.push(link);
-                        links.push(link);
-                        drawLinks();
+                    .on("dblclick", function(d) {
+                        if (d3.event.defaultPrevented) return; // prevents dragging
+                        if (!linkObj.source) { // if no target click refers to target node
+                            d3.select(this).select("rect").attr("class","chosen");
+                            linkObj.source = d;
+                        } else {
+                            linkObj.target = d;
+                            links.push(linkObj);
+                            drawLinks();
+                            linkObj = {}; // reset link object
+                            d3.selectAll("g").select("rect").attr("class","")
+                        }
+
                     })
                     .call(drag);
 
@@ -79,6 +99,7 @@ myApp.directive("dag", function() {
                         .attr("d", function(d) {
                             return line([{"x":d.source.x , "y":d.source.y },
                                 {"x":d.target.x , "y":d.target.y}]) })
+                        .attr("marker-end", "url(#end)");
                     ;
 
                     link.exit().remove();
@@ -87,20 +108,21 @@ myApp.directive("dag", function() {
                 force.on("tick", function() {
                     if(link) {
                         link.attr("d", function(d) {
-                            var offSetWS, offSetWT;
+                            var offSetWS, offSetWT, offSetHT, offSetHS;
                             var widthDiff = d.source.x - d.target.x;
+                            var heightDiff = d.source.y - d.target.y;
                             if(Math.abs(widthDiff) > rectWidth) {
-                                console.log("here");
                                 offSetWS = widthDiff < 0 ? rectWidth : 0;
                                 offSetWT = widthDiff > 0 ? rectWidth : 0;
+                            } else {
+                                offSetWS = offSetWT = rectWidth/2;
                             }
-                            else {
-                                offSetWS = widthDiff > 0 ? widthDiff : -widthDiff;
-                                offSetWT = widthDiff > 0 ? -widthDiff/2 : widthDiff/2;
-                                offSetWT += rectWidth;
+                            if(Math.abs(heightDiff) > rectHeight) {
+                                offSetHS = heightDiff < 0 ? rectHeight : 0;
+                                offSetHT = heightDiff > 0 ? rectHeight : 0;
+                            } else {
+                                offSetHT = offSetHS = rectHeight/2;
                             }
-                            var offSetHS = d.source.y < d.target.y ? rectHeight : 0;
-                            var offSetHT = d.source.y > d.target.y ? rectHeight: 0;
                             return line([{"x":d.source.x+offSetWS, "y":d.source.y+offSetHS },
                                 {"x":d.target.x+offSetWT , "y":d.target.y+offSetHT}])
                         });

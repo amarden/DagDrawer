@@ -37,13 +37,6 @@ html, body {
     cursor:pointer;
 }
 
-.node rect {
-    cursor:pointer;
-    fill:darkblue;
-    stroke-width:2px;
-}
-
-
 .node text {
     font-size: 10px;
     fill:yellow;
@@ -56,3 +49,14 @@ path.link {
     stroke:black;
     stroke-width:2px;
 }
+
+rect.chosen {
+    stroke: black;
+}
+
+rect.params {
+    fill:indianred;
+    stroke:none;
+    cursor:pointer;
+}
+
