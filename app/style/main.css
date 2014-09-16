@@ -48,6 +48,7 @@ html, body {
 path.link {
     stroke:black;
     stroke-width:2px;
+    fill:none;
 }
 
 rect.chosen {

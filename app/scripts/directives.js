@@ -8,10 +8,16 @@ myApp.directive("dag", function() {
             var rectHeight = 25;
             var links = [], linkObj={}, link;
 
-            var line = d3.svg.line()
+            var drawLine = function(test) {
+                return d3.svg.line()
                     .x(function(d) {return d.x; })
-                    .y(function(d) {return d.y; })
-            ;
+                    .y(function(d) { return d.y; })
+                    .interpolate(function(points) {
+                        console.log(test);
+                        return points.join("A 1,1 0 0 1 ");
+                    }) // custom interpolator
+                ;
+            };
 
             var svg = d3.select(elem[0])
                 .append("svg")
@@ -24,7 +30,7 @@ myApp.directive("dag", function() {
                 .size([width, height])
                 .charge(-300)
                 .nodes(scope.toDraw)
-                //.links(links)
+                .links(links)
                 ;
 
             function dragstart(d) {
@@ -46,7 +52,8 @@ myApp.directive("dag", function() {
                 .attr("markerHeight", 6)
                 .attr("orient", "auto")
                 .append("svg:path")
-                .attr("d", "M0,-5L10,0L0,5");
+                .attr("d", "M0,-5L10,0L0,5")
+                ;
 
             scope.$watchCollection('toDraw', function() {
                 updateDag();
@@ -64,7 +71,7 @@ myApp.directive("dag", function() {
                             d3.select(this).select("rect").attr("class","chosen");
                             linkObj.source = d;
                         } else {
-                            linkObj.target = d;
+                            linkObj.target = d, linkObj.curvD=1, linkObj.curv=0;
                             links.push(linkObj);
                             drawLinks();
                             linkObj = {}; // reset link object
@@ -76,8 +83,6 @@ myApp.directive("dag", function() {
 
                 nodeEnter.append("rect")
                     .attr("class", "params")
-//                    .attr("rx", 15)
-//                    .attr("ry", 15)
                     .attr("width", rectWidth)
                     .attr("height", rectHeight);
 
@@ -97,9 +102,15 @@ myApp.directive("dag", function() {
                     link.enter().insert("path", "g.node")
                         .attr("class", "link")
                         .attr("d", function(d) {
-                            return line([{"x":d.source.x , "y":d.source.y },
-                                {"x":d.target.x , "y":d.target.y}]) })
-                        .attr("marker-end", "url(#end)");
+                            //debugger;
+                             return drawLine("meh")([{"x":d.source.x , "y":d.source.y },
+                                {"x":d.target.x , "y":d.target.y}])
+                        })
+
+                        .attr("marker-end", "url(#end)")
+                        .on("click", function(d) {
+                            console.log(d);
+                        })
                     ;
 
                     link.exit().remove();
@@ -123,7 +134,8 @@ myApp.directive("dag", function() {
                             } else {
                                 offSetHT = offSetHS = rectHeight/2;
                             }
-                            return line([{"x":d.source.x+offSetWS, "y":d.source.y+offSetHS },
+
+                            return drawLine("mehTick")([{"x":d.source.x+offSetWS, "y":d.source.y+offSetHS },
                                 {"x":d.target.x+offSetWT , "y":d.target.y+offSetHT}])
                         });
                     }

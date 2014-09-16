@@ -15,6 +15,8 @@ myApp.controller("main", function($scope) {
         $scope.params.push(parameter);
         $scope.parameter = "";
     };
+
+    $scope.toDraw = testData;
     $scope.draw = function(p) {
         p.drawn = true;
         $scope.toDraw.push(p);
